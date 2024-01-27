@@ -7,7 +7,7 @@ export default class DeleteUseCase extends AbstractUseCase {
 		super(repository);
 	}
 
-	public async execute(id: number): Promise<void | null> {
+	public async execute(id: number | null): Promise<void | null> {
 
 		if (id == null) {
 			this.setError({ message: '"id" is a required field' });
