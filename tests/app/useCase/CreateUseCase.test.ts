@@ -1,22 +1,123 @@
-import { describe, test, expect } from 'vitest';
+import { beforeEach, describe, test, expect, vi, it } from 'vitest';
 import CreateUseCase from '../../../src/app/useCase/CreateUseCase';
+import ICustomerRepository from '../../../src/ports/ICustomerRepository';
+import { Customer } from '../../../src/domain/entities/Customer';
+import FindByCPFUseCase from '../../../src/app/useCase/FindByCPFUseCase';
+import AbstractUseCase from '../../../src/app/useCase/AbstractUseCase';
+import { ValidateFunction } from 'ajv';
+import IError from '../../../src/domain/error/IError';
+
+class MockCustomerRepository implements ICustomerRepository {
+    save(customer: Customer): Promise<Customer> {
+        return Promise.resolve(customer);
+    }
+    findByCPF(cpf: string): Promise<any> {
+        return Promise.resolve();
+    }
+    delete(id: number): Promise<void> {
+        return Promise.resolve();
+    }
+    list(): Promise<Customer[] | null> {
+        return Promise.resolve(null);
+    }
+}
 
 describe("CreateUseCase", () => {
-    test("constructor", () => {
+
+    let mockedCustomerRepository = new MockCustomerRepository();
+
+    let createUseCase : CreateUseCase;
+
+    const existingCustomerCPF = '33333333333';
+
+    vi.mock('../../../src/app/useCase/FindByCPFUseCase', async () => {
+        class FindByCPFUseCaseMock {
+            execute(cpf: string) {
+                const existingCustomerCPF = '33333333333';
+                if (cpf === existingCustomerCPF) {
+                    return {
+                        name: "test",
+                        cpf: existingCustomerCPF,
+                        email: "example@test.com"
+                    } as Customer;
+                }
+                return;
+            }
+        }
+        return {
+            default: FindByCPFUseCaseMock
+        }
+    });
+
+    beforeEach(()=>{
+        createUseCase = new CreateUseCase(mockedCustomerRepository);
+    })
+
+    it("On create get the repository", () => {
+        expect(createUseCase.repository).equal(mockedCustomerRepository);
+    })
+
+    it("Properly save with valid Customer object", async () => {
+        //arange
+        const bodyCustomer = {
+            name: "Customer test",
+            cpf: "11111111111",
+            email: "example@teste.com"
+        }
+
+        const executeSpy = vi.spyOn(createUseCase, 'execute');
+        const validateFieldsSpy = vi.spyOn(createUseCase as any, 'validateFields');
+        const saveSpy = vi.spyOn(mockedCustomerRepository, 'save');
+
+        //act
+        const createdCustomer = await createUseCase.execute(bodyCustomer);
+        
+        //assert
+        expect(executeSpy).toHaveBeenCalled();
+        expect(validateFieldsSpy).toHaveBeenCalledOnce();
+        expect(saveSpy).toHaveBeenCalledOnce();
+        expect(createdCustomer).toMatchObject(bodyCustomer);
 
     })
 
-    test("execute", () => {
+    it("Return erros if customer is missing cpf", async () => {
+        const customer = {
+            name: "example",
+            email: "example@teste.com"
+        }
 
+        await createUseCase.execute(customer);
+
+        expect(createUseCase.hasErrors()).toBeTruthy();
     })
 
-    test("validateFields", () => {
+    it("Return erros if customer is missing name", async () => {
+        const customer = {
+            cpf: "33333333333",
+            email: "example@teste.com"
+        }
+        const saveSpy = vi.spyOn(createUseCase.repository, 'save');
 
+        await createUseCase.execute(customer);
+
+        expect(createUseCase.hasErrors()).toBeTruthy();
+        expect(saveSpy).not.toBeCalled();
     })
 
-    test("validateCPFInUse", () => {
+    it("Return erros if customer already exists", async () => {
+        //arange
+        const customer = {
+            name: "example",
+            cpf: existingCustomerCPF,
+            email: "example@teste.com"
+        }
+        const saveSpy = vi.spyOn(createUseCase.repository, 'save');
 
+        //act
+        await createUseCase.execute(customer);
+
+        //assert
+        expect(createUseCase.hasErrors()).toBeTruthy();
+        expect(saveSpy).not.toBeCalled();
     })
-
-    
 })
