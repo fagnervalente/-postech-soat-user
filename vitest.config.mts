@@ -6,7 +6,7 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, 'tests/*'],
     coverage: {
       provider: 'istanbul',
-      reporter: ['text', 'lcov']
+      reporter: ['text', 'lcov', 'html']
     },
   }
 })
