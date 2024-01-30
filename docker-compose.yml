@@ -38,5 +38,5 @@ services:
       - DATABASE_PORT=${DATABASE_PORT}
       - RUN_ON=${RUN_ON}
     depends_on:
-      mongo:
+      database:
         condition: service_healthy
