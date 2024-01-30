@@ -2,6 +2,8 @@ import express, { NextFunction, Request, Response } from 'express';
 import routes from './routes/main';
 import * as core from 'express-serve-static-core';
 import InternalServerError from '../../domain/error/InternalServerError';
+import swaggerUi from 'swagger-ui-express';
+import swaggerFile from '../../../swagger_output.json';
 
 export default class HttpAdapter {
 	constructor(readonly server: core.Express) {
@@ -9,6 +11,7 @@ export default class HttpAdapter {
 	}
 
 	public initialize(): void {
+		this.setSwagger();
 		this.setJsonMiddleware();
 		this.setRoutes();
 		this.setErrorHandler();
@@ -31,5 +34,9 @@ export default class HttpAdapter {
 
 	private setRoutes(): void {
 		this.server.use(routes);
+	}
+
+	private setSwagger(): void {
+		this.server.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 	}
 }
