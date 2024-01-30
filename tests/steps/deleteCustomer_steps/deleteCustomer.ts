@@ -1,5 +1,5 @@
 import { Given, Then } from "@cucumber/cucumber";
-import CustomerInMemoryRepository from "../../utils/repositoryInMemory/CustomerInMemoryRepository";
+import CustomerInMemoryRepository from "../../mocks/CustomerInMemoryRepository";
 import DeleteUseCase from '../../../src/app/useCase/DeleteUseCase';
 import { Customer } from "../../../src/domain/entities/Customer";
 import CreateUseCase from "../../../src/app/useCase/CreateUseCase";

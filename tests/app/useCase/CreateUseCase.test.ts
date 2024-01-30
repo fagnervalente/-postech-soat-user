@@ -1,30 +1,11 @@
 import { beforeEach, describe, test, expect, vi, it } from 'vitest';
 import CreateUseCase from '../../../src/app/useCase/CreateUseCase';
-import ICustomerRepository from '../../../src/ports/ICustomerRepository';
 import { Customer } from '../../../src/domain/entities/Customer';
-import FindByCPFUseCase from '../../../src/app/useCase/FindByCPFUseCase';
-import AbstractUseCase from '../../../src/app/useCase/AbstractUseCase';
-import { ValidateFunction } from 'ajv';
-import IError from '../../../src/domain/error/IError';
-
-class MockCustomerRepository implements ICustomerRepository {
-    save(customer: Customer): Promise<Customer> {
-        return Promise.resolve(customer);
-    }
-    findByCPF(cpf: string): Promise<any> {
-        return Promise.resolve();
-    }
-    delete(id: number): Promise<void> {
-        return Promise.resolve();
-    }
-    list(): Promise<Customer[] | null> {
-        return Promise.resolve(null);
-    }
-}
+import CustomerInMemoryRepository from '../../mocks/CustomerInMemoryRepository';
 
 describe("CreateUseCase", () => {
 
-    let mockedCustomerRepository = new MockCustomerRepository();
+    let customerInMemoryRepository = new CustomerInMemoryRepository();
 
     let createUseCase : CreateUseCase;
 
@@ -50,11 +31,11 @@ describe("CreateUseCase", () => {
     });
 
     beforeEach(()=>{
-        createUseCase = new CreateUseCase(mockedCustomerRepository);
+        createUseCase = new CreateUseCase(customerInMemoryRepository);
     })
 
     it("On create get the repository", () => {
-        expect(createUseCase.repository).equal(mockedCustomerRepository);
+        expect(createUseCase.repository).equal(customerInMemoryRepository);
     })
 
     it("Properly save with valid Customer object", async () => {
@@ -67,7 +48,7 @@ describe("CreateUseCase", () => {
 
         const executeSpy = vi.spyOn(createUseCase, 'execute');
         const validateFieldsSpy = vi.spyOn(createUseCase as any, 'validateFields');
-        const saveSpy = vi.spyOn(mockedCustomerRepository, 'save');
+        const saveSpy = vi.spyOn(customerInMemoryRepository, 'save');
 
         //act
         const createdCustomer = await createUseCase.execute(bodyCustomer);

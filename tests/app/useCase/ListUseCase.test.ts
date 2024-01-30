@@ -1,34 +1,18 @@
-import { beforeEach, describe, test, expect, vi, it } from 'vitest';
+import { beforeEach, describe, expect, vi, it } from 'vitest';
 import ListUseCase from '../../../src/app/useCase/ListUseCase';
-import ICustomerRepository from '../../../src/ports/ICustomerRepository';
-import { Customer } from '../../../src/domain/entities/Customer';
-
-class MockCustomerRepository implements ICustomerRepository {
-    save(customer: Customer): Promise<Customer> {
-        return Promise.resolve(customer);
-    }
-    findByCPF(cpf: string): Promise<any> {
-        return Promise.resolve();
-    }
-    delete(id: number): Promise<void> {
-        return Promise.resolve();
-    }
-    list(): Promise<Customer[] | null> {
-        return Promise.resolve(null);
-    }
-}
+import CustomerInMemoryRepository from '../../mocks/CustomerInMemoryRepository';
 
 describe('ListUseCase', () => {
-    let mockedCustomerRepository = new MockCustomerRepository();
+    let customerInMemoryRepository = new CustomerInMemoryRepository();
 
     let listUseCase : ListUseCase;
 
     beforeEach(()=>{
-        listUseCase = new ListUseCase(mockedCustomerRepository);
+        listUseCase = new ListUseCase(customerInMemoryRepository);
     })
 
     it("List should be called", () => {
-        const listSpy = vi.spyOn(mockedCustomerRepository, 'list');
+        const listSpy = vi.spyOn(customerInMemoryRepository, 'list');
         listUseCase.execute();
         expect(listSpy).toHaveBeenCalledOnce();
     })

@@ -1,7 +1,7 @@
 import { Given, Then } from '@cucumber/cucumber';
 import { Customer } from '../../../src/domain/entities/Customer';
 import CreateUseCase from '../../../src/app/useCase/CreateUseCase';
-import CustomerInMemoryRepository from '../../utils/repositoryInMemory/CustomerInMemoryRepository';
+import CustomerInMemoryRepository from '../../mocks/CustomerInMemoryRepository';
 import assert from 'assert';
 
 const mockedCustomer: Customer = {
