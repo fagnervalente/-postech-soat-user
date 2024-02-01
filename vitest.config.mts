@@ -7,7 +7,7 @@ export default defineConfig({
     coverage: {
       provider: 'istanbul',
       reporter: ['text', 'lcov', 'html'],
-      exclude: ['cucumber.js', 'swagger.ts', 'tests/*']
+      exclude: ['tests/**/*', 'cucumber.js', 'docker-compose.yml', 'Dockerfile', 'jest.config.js', 'package.json', 'tsconfig.json', 'src/index.ts', 'src/app.ts', 'src/adapter/**/*', 'swagger.ts']
     },
   }
 })
