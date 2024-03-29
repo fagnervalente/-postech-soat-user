@@ -1,6 +1,6 @@
+import RemoveDataUseCase from "../app/useCase/RemoveDataUseCase";
 import CreateUseCase from "../app/useCase/CreateUseCase";
 import FindByCPFUseCase from "../app/useCase/FindByCPFUseCase";
-import DeleteUseCase from "../app/useCase/DeleteUseCase";
 import ListUseCase from "../app/useCase/ListUseCase";
 import { Customer } from "@entities/Customer";
 import CustomerRepository from "@ports/ICustomerRepository";
@@ -13,9 +13,9 @@ export class CustomerController {
 		this.repository = repository;
 	}
 
-	async create(name: string, cpf: string, email: string): Promise<Customer | null | IError[]> {
+	async create(name: string, cpf: string, email: string, address?: string, phone?: string): Promise<Customer | null | IError[]> {
 		const createUseCase = new CreateUseCase(this.repository);
-		const created = await createUseCase.execute({ name, cpf, email });
+		const created = await createUseCase.execute({ name, cpf, email, address, phone });
 
 		if (createUseCase.hasErrors()) {
 			throw createUseCase.getErrors();
@@ -46,14 +46,14 @@ export class CustomerController {
 		return Promise.resolve(customer);
 	}
 
-	async delete(id: number): Promise<void> {
-		const deleteUseCase = new DeleteUseCase(this.repository);
-		await deleteUseCase.execute(id);
+	async forget(id: number, name: boolean, cpf: boolean, email: boolean, address: boolean, phone: boolean){
+		const removeDataUseCase = new RemoveDataUseCase(this.repository);
+		const updated = await removeDataUseCase.execute({id, name, cpf, email, address, phone});
 
-		if (deleteUseCase.hasErrors()) {
-			return Promise.reject(deleteUseCase.getErrors());
+		if (removeDataUseCase.hasErrors()) {
+			throw removeDataUseCase.getErrors();
 		}
 
-		return Promise.resolve();
+		return updated;
 	}
 }

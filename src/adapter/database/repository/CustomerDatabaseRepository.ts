@@ -35,9 +35,15 @@ export default class CustomerDatabaseRepository implements ICustomerRepository {
 
 		return null;
 	}
+	
+	async findById(id: number): Promise<Customer | null> {
+		const result = await this.customerRepository.findOneBy({ id });
 
-	async delete(id: number): Promise<void> {
-		await this.customerRepository.delete(id);
+		if (result) {
+			return CustomerDatabaseRepository.mapDataModelToEntity(result);
+		}
+
+		return null;
 	}
 
 	static mapDataModelToEntity(model: CustomerModel): Customer {
@@ -45,7 +51,9 @@ export default class CustomerDatabaseRepository implements ICustomerRepository {
 			model.id,
 			model.name,
 			model.cpf,
-			model.email
+			model.email,
+			model.address,
+			model.phone
 		);
 	}
 
@@ -54,7 +62,9 @@ export default class CustomerDatabaseRepository implements ICustomerRepository {
 			entity.id,
 			entity.name,
 			entity.cpf,
-			entity.email
+			entity.email,
+			entity.address,
+			entity.phone
 		);
 	}
 }

@@ -1,6 +1,5 @@
 import ICustomerRepository from "../../src/ports/ICustomerRepository";
 import { CustomerModel as Customer } from "../../src/adapter/database/models/CustomerModel";
-import CustomerDatabaseRepository from "../../src/adapter/database/repository/CustomerDatabaseRepository";
 
 export default class CustomerInMemoryRepository implements ICustomerRepository {
 	public customers: Customer[] = [];
@@ -25,9 +24,14 @@ export default class CustomerInMemoryRepository implements ICustomerRepository {
 		return null;
 	}
 
-	public async delete(id: number): Promise<void> {
-		this.customers = this.customers.filter((customer) => {
-			return customer.id != id;
-		});
+	public async findById(id: number): Promise<Customer | null> {
+		const customer = this.customers.find((customer) => customer.id == id) ?? null;
+		
+		if (customer) {
+			return customer;
+		}
+
+		return null;
 	}
+
 }

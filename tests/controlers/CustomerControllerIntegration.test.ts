@@ -10,7 +10,9 @@ describe("CustomerController", () => {
     const customerOne = {
         name: "example",
         cpf: "11111111111",
-        email: "example@test.com"
+        email: "example@test.com",
+        address: 'Rua 3, N 4, Centro, Goiânia-GO',
+        phone: '+5562123456789'
     }
 
     beforeEach(() => {
@@ -31,7 +33,7 @@ describe("CustomerController", () => {
 
     describe("create", () => {
         it("Should create customer", async () => {
-            const created = await customerController.create(customerOne.name, customerOne.cpf, customerOne.email);
+            const created = await customerController.create(customerOne.name, customerOne.cpf, customerOne.email, customerOne.address, customerOne.phone);
             expect(created).toMatchObject(customerOne);
         })
         it("Should throw an error by using a wrong email", async () => {
@@ -47,7 +49,7 @@ describe("CustomerController", () => {
         })
 
         it("Must return one item on list", async () => {
-            const customer = await customerController.create('example', '33333333333', 'example1@test.com');
+            const customer = await customerController.create('example', '33333333333', 'example1@test.com', 'Rua 3, N 4, Goiânia-GO', '+5562123456789');
             const result = await customerController.list();
             expect(result).not.toBeNull();
             expect(result?.length).toBe(1);
@@ -64,27 +66,35 @@ describe("CustomerController", () => {
 
         it("Should return the customer", async () => {
             const customerCPF = '22222222222';
-            const customer = await customerController.create('example', customerCPF, 'example1@test.com');
+            const customer = await customerController.create('example', customerCPF, 'example1@test.com', 'Rua 3, N 4, Goiânia-GO', '+5562123456789');
             const result = await customerController.getCustomerByCPF(customerCPF);
             expect(result).toMatchObject(customer);
         })
     })
 
-    describe("delete", () => {
-        it("Should delete the customer", async () => {
-            const customer = await customerController.create('example', '66666666666', 'example1@test.com');
-            await customerController.delete(customer.id as number);
-            const list = await customerController.list();
-            expect(list?.length).toBe(0);
+    describe("forget", () => {
+        it("Should return an error Customer not found", async () => {
+            const customerId = 123;
+            await expect(() => customerController.forget(customerId, true, true, true, true, true)).rejects.toThrowError();
         })
 
-        it("Should not delete", async () => {
-            await customerController.create('example2', '99999999999', 'example3@test.com');
-            await customerController.delete(1234 as number);
-            const list = await customerController.list();
-            expect(list?.length).toBe(1);
+        it("Should return a validation error", async () => {
+            const customerId = 123;
+            await expect(() => customerController.forget(customerId, true, true, true, true, '' as any)).rejects.toThrowError();
         })
 
-        
+        it("Should return anonimyzed customer", async () => {
+            const customer = await customerController.create(customerOne.name, customerOne.cpf, customerOne.email, customerOne.address, customerOne.phone);
+            const customerId = customer.id;
+
+            const anonimyzed = await customerController.forget(customerId, true, true, true, true, true);
+
+            expect(anonimyzed.name).not.toBe(customer.name);
+            expect(anonimyzed.cpf).not.toBe(customer.cpf);
+            expect(anonimyzed.email).not.toBe(customer.email);
+            expect(anonimyzed.address).not.toBe(customer.address);
+            expect(anonimyzed.phone).not.toBe(customer.phone);
+        })
     })
+
 })

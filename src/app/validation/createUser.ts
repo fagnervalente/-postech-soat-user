@@ -6,7 +6,9 @@ const schema: Schema = {
   properties: {
     name: { type: "string" },
     cpf: { type: "string" },
-    email: { type: "string", format: "email" }
+    email: { type: "string", format: "email" },
+    address: { type: "string"},
+    phone: { type: "string"}
   },
   required: ["name", "cpf", "email"],
   additionalProperties: false

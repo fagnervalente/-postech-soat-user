@@ -3,6 +3,7 @@ import CustomerDatabaseRepository from "@database/repository/CustomerDatabaseRep
 import { CustomerController } from "@controllers/CustomerController";
 import AuthLambdaIntegration from "src/adapter/auth/AuthLambdaIntegration";
 import { Customer } from "@entities/Customer";
+import IAuthenticatedRequest from "@ports/auth/IAuthenticatedRequest";
 
 const customerRepository = new CustomerDatabaseRepository();
 const customerController = new CustomerController(customerRepository);
@@ -18,10 +19,10 @@ export class CustomerApiController {
 				required: true,
 				schema: { $ref: "#/definitions/CreateCustomer" }
 		} */
-		const { name, cpf, email } = req.body;
+		const { name, cpf, email, address, phone } = req.body;
 
 		try {
-			const created = await customerController.create(name, cpf, email);
+			const created = await customerController.create(name, cpf, email, address, phone);
 
 			const authIntegration = new AuthLambdaIntegration();
 			authIntegration.putClient(created as Customer);
@@ -72,20 +73,28 @@ export class CustomerApiController {
 		}
 	}
 
-	async delete(req: Request, res: Response) {
+	async forget(req: Request, res: Response){
 		// #swagger.tags = ['Customer']
-		// #swagger.description = 'Endpoint para remover um cliente.'
-		/* #swagger.parameters['id'] = { in: 'path', description: 'ID do cliente' } */
-		const { id } = req.params;
-		const customerId = Number(id);
+		// #swagger.description = 'Endpoint remoção de dados de um cliente.'
+		/* #swagger.parameters['forgetCustomer'] = {
+				in: 'body',
+				description: 'Campos que devem ser removidos do cadastro.',
+				required: true,
+				schema: { $ref: "#/definitions/ForgetCustomer" }
+		} */
+		const { name, cpf, email, address, phone } = req.body;
+		const customerId: number = +(req as IAuthenticatedRequest).userInfo.id;
 
 		try {
-			await customerController.delete(customerId);
+			const anonymizedCustomer = await customerController.forget(customerId, name, cpf, email, address, phone);
+
+			const authIntegration = new AuthLambdaIntegration();
+			authIntegration.putClient(anonymizedCustomer as Customer);
 
 			/* #swagger.responses[200] = {
-				description: 'Cliente removido'
+				description: 'Dados removidos'
 			} */
-			return res.status(200).json();
+			return res.status(200).json(anonymizedCustomer);
 		} catch (error) {
 			return res.status(400).json(error);
 		}
