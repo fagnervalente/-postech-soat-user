@@ -1,5 +1,6 @@
 import ICustomerRepository from "../../src/ports/ICustomerRepository";
 import { CustomerModel as Customer } from "../../src/adapter/database/models/CustomerModel";
+import crypto from 'crypto';
 
 export default class CustomerInMemoryRepository implements ICustomerRepository {
 	public customers: Customer[] = [];
@@ -9,7 +10,8 @@ export default class CustomerInMemoryRepository implements ICustomerRepository {
 	}
 
 	public async save(customer: Customer): Promise<Customer> {
-		const created = { ...customer, id: Math.floor(Math.random() * Date.now()) };
+		const randomNumber = crypto.randomInt(1000)/1000;
+		const created = { ...customer, id: Math.floor(randomNumber * Date.now()) };
 		this.customers.push(created);
 
 		return created;
